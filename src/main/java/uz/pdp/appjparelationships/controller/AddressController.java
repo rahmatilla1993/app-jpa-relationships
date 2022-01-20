@@ -16,31 +16,32 @@ public class AddressController {
     AddressRepository addressRepository;
 
     @GetMapping
-    public List<Address> getAddresses(){
+    public List<Address> getAddresses() {
         return addressRepository.findAll();
     }
 
     @PostMapping
-    public String addAddress(@RequestBody Address address){
-        Address new_address=new Address();
+    public String addAddress(@RequestBody Address address) {
+        Address new_address = new Address();
         String city = address.getCity();
         String district = address.getDistrict();
         String street = address.getStreet();
         Integer houseNumber = address.getHouseNumber();
-        if(addressRepository.existsByCityAndDistrictAndStreetAndHouseNumber(city,district,street,houseNumber)){
+        if (addressRepository.existsByCityAndDistrictAndStreetAndHouseNumber(city, district, street, houseNumber)) {
             return "Address already exists";
         }
         new_address.setCity(city);
         new_address.setDistrict(district);
         new_address.setStreet(street);
         new_address.setHouseNumber(houseNumber);
+        addressRepository.save(new_address);
         return "Address added";
     }
 
     @DeleteMapping("/{id}")
-    public String deleteAddress(@PathVariable Integer id){
+    public String deleteAddress(@PathVariable Integer id) {
         Optional<Address> optionalAddress = addressRepository.findById(id);
-        if(optionalAddress.isPresent()){
+        if (optionalAddress.isPresent()) {
             Address address = optionalAddress.get();
             addressRepository.delete(address);
             return "Address deleted";
@@ -48,5 +49,25 @@ public class AddressController {
         return "Address not found";
     }
 
-    
+    @PutMapping("/{id}")
+    public String editAddress(@PathVariable Integer id, @RequestBody Address address) {
+        Optional<Address> optionalAddress = addressRepository.findById(id);
+        if (optionalAddress.isPresent()) {
+            Address editAddress = optionalAddress.get();
+            String city = address.getCity();
+            String district = address.getDistrict();
+            String street = address.getStreet();
+            Integer houseNumber = address.getHouseNumber();
+            if (addressRepository.existsByIdIsNotAndCityAndDistrictAndStreetAndHouseNumber(id, city, district, street, houseNumber)) {
+                return "Address already exists";
+            }
+            editAddress.setCity(city);
+            editAddress.setDistrict(district);
+            editAddress.setStreet(street);
+            editAddress.setHouseNumber(houseNumber);
+            addressRepository.save(editAddress);
+            return "Address edited";
+        }
+        return "Address not found";
+    }
 }

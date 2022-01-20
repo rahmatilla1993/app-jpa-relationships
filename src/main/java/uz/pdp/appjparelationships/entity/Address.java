@@ -24,5 +24,6 @@ public class Address {
     @Column(nullable = false)
     private String street;//U.Nosir ko'chasi
 
-
+    @Column(nullable = false)
+    private Integer houseNumber;
 }

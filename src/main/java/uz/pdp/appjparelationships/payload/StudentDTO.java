@@ -3,9 +3,6 @@ package uz.pdp.appjparelationships.payload;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uz.pdp.appjparelationships.entity.Address;
-import uz.pdp.appjparelationships.entity.Group;
-import uz.pdp.appjparelationships.entity.Subject;
 
 import java.util.List;
 

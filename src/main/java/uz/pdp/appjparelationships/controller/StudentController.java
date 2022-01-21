@@ -86,8 +86,8 @@ public class StudentController {
     }
 
     @PostMapping
-    public String addStudent(@RequestBody StudentDTO studentDTO){
-        Student student=new Student();
+    public String addStudent(@RequestBody StudentDTO studentDTO) {
+        Student student = new Student();
         String firstName = studentDTO.getFirstName();
         String lastName = studentDTO.getLastName();
         Integer group_id = studentDTO.getGroup_id();
@@ -95,28 +95,28 @@ public class StudentController {
         List<Integer> subjects_ids = studentDTO.getSubjects_ids();
 
         Optional<Address> optionalAddress = addressRepository.findById(address_id);
-        if(!optionalAddress.isPresent()){
+        if (!optionalAddress.isPresent()) {
             return "Address not found";
         }
         Address address = optionalAddress.get();
 
         Optional<Group> optionalGroup = groupRepository.findById(group_id);
-        if(!optionalGroup.isPresent()){
+        if (!optionalGroup.isPresent()) {
             return "Group not found";
         }
         Group group = optionalGroup.get();
 
-        if(studentRepository.existsByFirstNameAndLastNameAndAddress_Id(firstName,lastName,address_id)){
+        if (studentRepository.existsByFirstNameAndLastNameAndAddress_Id(firstName, lastName, address_id)) {
             return "Student already exists";
         }
         student.setFirstName(firstName);
         student.setLastName(lastName);
         student.setGroup(group);
         student.setAddress(address);
-        List<Subject> subjects=new ArrayList<>();
+        List<Subject> subjects = new ArrayList<>();
         for (Integer subjects_id : subjects_ids) {
             Optional<Subject> optionalSubject = subjectRepository.findById(subjects_id);
-            if(optionalSubject.isPresent()){
+            if (optionalSubject.isPresent()) {
                 subjects.add(optionalSubject.get());
             }
             return "Subject not found";
@@ -124,5 +124,61 @@ public class StudentController {
         student.setSubjects(subjects);
         studentRepository.save(student);
         return "Student saved";
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteStudent(@PathVariable Integer id){
+        Optional<Student> optionalStudent = studentRepository.findById(id);
+        if(optionalStudent.isPresent()){
+            studentRepository.delete(optionalStudent.get());
+            return "Student deleted";
+        }
+        return "Student not found";
+    }
+
+    @PutMapping("/{id}")
+    public String editStudent(@PathVariable Integer id,@RequestBody StudentDTO studentDTO){
+        Optional<Student> optionalStudent = studentRepository.findById(id);
+        if(optionalStudent.isPresent()){
+            Student editStudent = optionalStudent.get();
+            String firstName = studentDTO.getFirstName();
+            String lastName = studentDTO.getLastName();
+            Integer address_id = studentDTO.getAddress_id();
+            Integer group_id = studentDTO.getGroup_id();
+            List<Subject> subjects=new ArrayList<>();
+
+            Optional<Address> optionalAddress = addressRepository.findById(address_id);
+            if(!optionalAddress.isPresent()){
+                return "Address not found";
+            }
+            Address address = optionalAddress.get();
+
+            Optional<Group> optionalGroup = groupRepository.findById(group_id);
+            if(!optionalGroup.isPresent()){
+                return "Group not found";
+            }
+            Group group = optionalGroup.get();
+
+            if(studentRepository.existsByIdIsNotAndFirstNameAndLastNameAndAddress_Id(id,firstName,lastName,studentDTO.getAddress_id())){
+                return "Student already exists";
+            }
+
+            for (Integer subjects_id : studentDTO.getSubjects_ids()) {
+                Optional<Subject> optionalSubject = subjectRepository.findById(subjects_id);
+                if(!optionalSubject.isPresent()){
+                    return "Subject not found";
+                }
+                subjects.add(optionalSubject.get());
+            }
+
+            editStudent.setSubjects(subjects);
+            editStudent.setFirstName(firstName);
+            editStudent.setLastName(lastName);
+            editStudent.setAddress(address);
+            editStudent.setGroup(group);
+            studentRepository.save(editStudent);
+            return "Student edited";
+        }
+        return "Student not found";
     }
 }
